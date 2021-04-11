@@ -38,6 +38,7 @@ def home():
 def recommend():
     if (request.method == 'POST'):
         user=request.form['UserName']
+        user=user.lower()
         if user in user_final_rating.index:
             g=user_final_rating.loc[user].sort_values(ascending=False)[:20] #top 20 items
             f=pd.DataFrame(g.index)
