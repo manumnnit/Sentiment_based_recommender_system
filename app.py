@@ -38,14 +38,17 @@ def home():
 def recommend():
     if (request.method == 'POST'):
         user=request.form['UserName']
-        g=user_final_rating.loc[user].sort_values(ascending=False)[:20] #top 20 items
-        f=pd.DataFrame(g.index)
-        f['pos_review_per']=f['id'].apply(reviews_sentiment) #fine tuning by using sentiment analyzer
-        final=pd.DataFrame(f.sort_values(by=['pos_review_per'],ascending=False)[:5]) #filtering top 5 recommendations
-        merged=pd.merge(final,reviews,how='left',left_on='id',right_on='id')
-        merged=merged[['id','brand','name','pos_review_per']]
-        final_items=merged.drop_duplicates(keep='first')
-    return render_template('index.html',tables=[final_items.to_html(classes='data', header=True,index=False)])
+        if user in user_final_rating.index:
+            g=user_final_rating.loc[user].sort_values(ascending=False)[:20] #top 20 items
+            f=pd.DataFrame(g.index)
+            f['pos_review_per']=f['id'].apply(reviews_sentiment) #fine tuning by using sentiment analyzer
+            final=pd.DataFrame(f.sort_values(by=['pos_review_per'],ascending=False)[:5]) #filtering top 5 recommendations
+            merged=pd.merge(final,reviews,how='left',left_on='id',right_on='id')
+            merged=merged[['id','brand','name','pos_review_per']]
+            final_items=merged.drop_duplicates(keep='first')
+            return render_template('index.html',tables=[final_items.to_html(classes='data', header=True,index=False)])
+        else:
+            return render_template('index.html',user_not_found='User Not found in database')
 
 
 if __name__ == '__main__':
